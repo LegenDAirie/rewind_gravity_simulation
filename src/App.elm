@@ -10,8 +10,8 @@ import Task
 
 
 type alias Ball =
-    { velocity : List Float
-    , position : List Float
+    { velocity : { vx : Float, vy : Float }
+    , position : { x : Float, y : Float }
     }
 
 
@@ -23,8 +23,8 @@ type alias Model =
 
 defaultBall : Ball
 defaultBall =
-    { velocity = [ 0, 0 ]
-    , position = [ 20, 20 ]
+    { velocity = { vx = 0, vy = 0 }
+    , position = { x = 0, y = 0 }
     }
 
 
@@ -88,7 +88,7 @@ view model =
         toHtml <|
             collage width
                 height
-                [ oval 100 100
+                [ oval ball.position.x ball.position.y
                     |> filled (rgb 60 100 60)
                 ]
 
