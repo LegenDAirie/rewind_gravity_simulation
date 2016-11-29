@@ -7,11 +7,12 @@ import Element exposing (container, middle, toHtml)
 import AnimationFrame
 import Window
 import Task
+import Math.Vector2 exposing (Vec2, vec2, getX, getY)
 
 
 type alias Ball =
-    { velocity : { vx : Float, vy : Float }
-    , position : { x : Float, y : Float }
+    { velocity : Vec2
+    , position : Vec2
     }
 
 
@@ -23,8 +24,8 @@ type alias Model =
 
 defaultBall : Ball
 defaultBall =
-    { velocity = { vx = 0, vy = 0 }
-    , position = { x = 0, y = 0 }
+    { velocity = vec2 0 0
+    , position = vec2 0 0
     }
 
 
@@ -78,12 +79,20 @@ step dt model =
 
 ballStepHelper : Ball -> Float -> Ball
 ballStepHelper ball dt =
-    { ball | position = positionStepHelper ball.position dt }
+    let
+        currentX =
+            getX ball.position
 
+        currentY =
+            getY ball.position
 
-positionStepHelper : { x : Float, y : Float } -> Float -> { x : Float, y : Float }
-positionStepHelper position dt =
-    { position | x = position.x + 1, y = position.y + 1 }
+        newX =
+            currentX + 1
+
+        newY =
+            currentY + 1
+    in
+        { ball | position = vec2 newX newY }
 
 
 view : Model -> Html Msg
@@ -100,7 +109,7 @@ view model =
                 height
                 [ oval 50 50
                     |> filled (rgb 60 100 60)
-                    |> move ( ball.position.x, ball.position.y )
+                    |> move ( getX ball.position, getY ball.position )
                 ]
 
 
