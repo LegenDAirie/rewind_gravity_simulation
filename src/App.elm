@@ -43,7 +43,7 @@ defaultModel =
 
 initialSizeCmd : Cmd Msg
 initialSizeCmd =
-    Task.perform (\size -> Resize size.height size.width) Window.size
+    Task.perform (\{ width, height } -> Resize width height) Window.size
 
 
 init : ( Model, Cmd Msg )
@@ -58,7 +58,7 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Resize newHeight newWidth ->
+        Resize newWidth newHeight ->
             let
                 newWindowSize =
                     { width = newWidth, height = newHeight }
@@ -87,4 +87,4 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Window.resizes (\{ height, width } -> Resize height width)
+    Window.resizes (\{ width, height } -> Resize width height)
