@@ -1,12 +1,9 @@
 module App exposing (..)
 
 import Html exposing (Html, div)
-
-
--- import Html.Attributes
--- import Collage exposing (collage, oval, filled)
--- import Element exposing (container, middle, toHtml)
-
+import Color exposing (rgb)
+import Collage exposing (collage, oval, filled)
+import Element exposing (container, middle, toHtml)
 import Window
 import Task
 
@@ -73,28 +70,19 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ Html.text (toString model.windowSize.width)
-        , Html.text " "
-        , Html.text (toString model.windowSize.height)
-        ]
+    let
+        { ball, windowSize } =
+            model
 
-
-
--- let
---     { ball, windowSize } =
---         model
---
---     { width, height } =
---         windowSize
--- in
---     toHtml <|
---         container width height middle <|
---             collage 400
---                 400
---                 [ oval 100 100
---                     |> filled (rgb 60 100 60)
---                 ]
+        { width, height } =
+            windowSize
+    in
+        toHtml <|
+            collage width
+                height
+                [ oval 100 100
+                    |> filled (rgb 60 100 60)
+                ]
 
 
 subscriptions : Model -> Sub Msg
