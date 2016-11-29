@@ -4,6 +4,7 @@ import Html exposing (Html, div)
 import Color exposing (rgb)
 import Collage exposing (collage, oval, filled)
 import Element exposing (container, middle, toHtml)
+import AnimationFrame
 import Window
 import Task
 
@@ -53,6 +54,7 @@ init =
 
 type Msg
     = Resize Int Int
+    | Tick Float
 
 
 update : Msg -> Model -> Model
@@ -64,6 +66,14 @@ update msg model =
                     { width = newWidth, height = newHeight }
             in
                 { model | windowSize = newWindowSize }
+
+        Tick dt ->
+            step dt model
+
+
+step : Float -> Model -> Model
+step dt model =
+    model
 
 
 view : Model -> Html Msg
@@ -85,4 +95,7 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Window.resizes (\{ width, height } -> Resize width height)
+    Sub.batch
+        [ Window.resizes (\{ width, height } -> Resize width height)
+        , AnimationFrame.diffs Tick
+        ]
