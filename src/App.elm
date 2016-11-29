@@ -17,7 +17,7 @@ type alias Ball =
 
 
 type alias Model =
-    { ball : Ball
+    { balls : List Ball
     , windowSize : Window.Size
     }
 
@@ -38,9 +38,17 @@ defaultWindow =
 
 defaultModel : Model
 defaultModel =
-    { ball = defaultBall
+    { balls = createListOfBalls 3
     , windowSize = defaultWindow
     }
+
+
+createListOfBalls : Int -> List Ball
+createListOfBalls num =
+    if num == 0 then
+        []
+    else
+        defaultBall :: createListOfBalls (num - 1)
 
 
 initialSizeCmd : Cmd Msg
@@ -74,7 +82,7 @@ update msg model =
 
 step : Float -> Model -> Model
 step dt model =
-    { model | ball = ballStepHelper model.ball dt }
+    { model | balls = List.map (\ball -> ballStepHelper ball dt) model.balls }
 
 
 ballStepHelper : Ball -> Float -> Ball
@@ -98,7 +106,7 @@ ballStepHelper ball dt =
 view : Model -> Html Msg
 view model =
     let
-        { ball, windowSize } =
+        { balls, windowSize } =
             model
 
         { width, height } =
@@ -107,10 +115,15 @@ view model =
         toHtml <|
             collage width
                 height
-                [ oval 50 50
-                    |> filled (rgb 60 100 60)
-                    |> move ( getX ball.position, getY ball.position )
-                ]
+                (List.map
+                    (\ball ->
+                        (oval 50 50
+                            |> filled (rgb 60 100 60)
+                            |> move ( getX ball.position, getY ball.position )
+                        )
+                    )
+                    balls
+                )
 
 
 subscriptions : Model -> Sub Msg
