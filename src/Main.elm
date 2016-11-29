@@ -6,4 +6,9 @@ import Html exposing (program)
 
 main : Program Never Model Msg
 main =
-    program { view = view, init = init, update = update, subscriptions = subscriptions }
+    program
+        { view = view
+        , init = init
+        , update = \msg model -> ( update msg model, Cmd.none )
+        , subscriptions = subscriptions
+        }

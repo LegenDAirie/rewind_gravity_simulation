@@ -55,7 +55,7 @@ type Msg
     = Resize Int Int
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model -> Model
 update msg model =
     case msg of
         Resize newWidth newHeight ->
@@ -63,9 +63,7 @@ update msg model =
                 newWindowSize =
                     { width = newWidth, height = newHeight }
             in
-                ( { model | windowSize = newWindowSize }
-                , Cmd.none
-                )
+                { model | windowSize = newWindowSize }
 
 
 view : Model -> Html Msg
