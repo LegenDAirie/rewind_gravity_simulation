@@ -17,15 +17,9 @@ type alias Ball =
     }
 
 
-type alias WindowSize =
-    { width : Int
-    , height : Int
-    }
-
-
 type alias Model =
     { ball : Ball
-    , windowSize : WindowSize
+    , windowSize : Window.Size
     }
 
 
@@ -36,7 +30,7 @@ defaultBall =
     }
 
 
-defaultWindow : WindowSize
+defaultWindow : Window.Size
 defaultWindow =
     { width = 0
     , height = 0
@@ -50,14 +44,18 @@ defaultModel =
     }
 
 
+initialSizeCmd : Cmd Msg
+initialSizeCmd =
+    Task.perform (\size -> Resize size.height size.width) Window.size
+
+
 init : ( Model, Cmd Msg )
 init =
-    ( defaultModel, Cmd.none )
+    ( defaultModel, initialSizeCmd )
 
 
 type Msg
     = Resize Int Int
-    | NoOp
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -71,9 +69,6 @@ update msg model =
                 ( { model | windowSize = newWindowSize }
                 , Cmd.none
                 )
-
-        NoOp ->
-            ( model, Cmd.none )
 
 
 view : Model -> Html Msg
