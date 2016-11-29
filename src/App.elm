@@ -4,10 +4,11 @@ import Html exposing (Html, div)
 import Color exposing (rgb)
 import Collage exposing (collage, oval, filled, move)
 import Element exposing (container, middle, toHtml)
+import Math.Vector2 exposing (Vec2, vec2, getX, getY)
+import Random exposing (..)
 import AnimationFrame
 import Window
 import Task
-import Math.Vector2 exposing (Vec2, vec2, getX, getY)
 
 
 type alias Ball =
@@ -22,10 +23,10 @@ type alias Model =
     }
 
 
-defaultBall : Ball
-defaultBall =
+defaultBall : Float -> Float -> Ball
+defaultBall x y =
     { velocity = vec2 0 0
-    , position = vec2 0 0
+    , position = vec2 x y
     }
 
 
@@ -38,32 +39,33 @@ defaultWindow =
 
 defaultModel : Model
 defaultModel =
-    { balls = createListOfBalls 3
+    { balls = []
     , windowSize = defaultWindow
     }
 
 
-createListOfBalls : Int -> List Ball
-createListOfBalls num =
-    if num == 0 then
-        []
-    else
-        defaultBall :: createListOfBalls (num - 1)
-
-
-initialSizeCmd : Cmd Msg
+initialSizeCmd : List (Cmd Msg)
 initialSizeCmd =
-    Task.perform (\{ width, height } -> Resize width height) Window.size
+    [ Task.perform (\{ width, height } -> Resize width height) Window.size
+    , Random.generate GetRandomVectors vectorGenerator
+    ]
+
+
+vectorGenerator : Generator (List Vec2)
+vectorGenerator =
+    Random.list 3 <|
+        Random.map (\( x, y ) -> vec2 x y) (Random.pair (Random.float -500 0) (Random.float -500 0))
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( defaultModel, initialSizeCmd )
+    ( defaultModel, initialSizeCmd |> Cmd.batch )
 
 
 type Msg
     = Resize Int Int
     | Tick Float
+    | GetRandomVectors (List Vec2)
 
 
 update : Msg -> Model -> Model
@@ -78,6 +80,19 @@ update msg model =
 
         Tick dt ->
             step dt model
+
+        GetRandomVectors vectors ->
+            { model | balls = createBalls vectors }
+
+
+createBalls : List Vec2 -> List Ball
+createBalls vectors =
+    List.map (\vector -> defaultBall (getX vector) (getY vector)) vectors
+
+
+
+-- Debug.log (toString vectors)
+--     [ defaultBall -500 -500 ]
 
 
 step : Float -> Model -> Model
