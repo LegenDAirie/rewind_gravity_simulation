@@ -73,7 +73,18 @@ update msg model =
 
 step : Float -> Model -> Model
 step dt model =
-    model
+    { model | ball = ballStepHelper model.ball dt }
+
+
+ballStepHelper : Ball -> Float -> Ball
+ballStepHelper ball dt =
+    { ball | position = positionStepHelper ball.position dt }
+
+
+positionStepHelper : { x : Float, y : Float } -> Float -> { x : Float, y : Float }
+positionStepHelper position dt =
+    Debug.log (toString position.x)
+        { position | x = position.x + 1, y = position.y + 1 }
 
 
 view : Model -> Html Msg
