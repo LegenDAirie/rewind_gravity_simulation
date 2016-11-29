@@ -2,7 +2,7 @@ module App exposing (..)
 
 import Html exposing (Html, div)
 import Color exposing (rgb)
-import Collage exposing (collage, oval, filled)
+import Collage exposing (collage, oval, filled, move)
 import Element exposing (container, middle, toHtml)
 import AnimationFrame
 import Window
@@ -83,8 +83,7 @@ ballStepHelper ball dt =
 
 positionStepHelper : { x : Float, y : Float } -> Float -> { x : Float, y : Float }
 positionStepHelper position dt =
-    Debug.log (toString position.x)
-        { position | x = position.x + 1, y = position.y + 1 }
+    { position | x = position.x + 1, y = position.y + 1 }
 
 
 view : Model -> Html Msg
@@ -99,8 +98,9 @@ view model =
         toHtml <|
             collage width
                 height
-                [ oval ball.position.x ball.position.y
+                [ oval 50 50
                     |> filled (rgb 60 100 60)
+                    |> move ( ball.position.x, ball.position.y )
                 ]
 
 
