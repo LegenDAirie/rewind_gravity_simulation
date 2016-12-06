@@ -5,7 +5,7 @@ import Color exposing (rgb)
 import Collage exposing (collage, oval, filled, move)
 import Element exposing (container, middle, toHtml)
 import Math.Vector2 exposing (Vec2, vec2, getX, getY, add)
-import Random exposing (..)
+import Random exposing (Generator)
 import AnimationFrame
 import Window
 import Task
@@ -47,25 +47,25 @@ defaultModel =
 initialSizeCmd : List (Cmd Msg)
 initialSizeCmd =
     [ Task.perform (\{ width, height } -> Resize width height) Window.size
-    , Random.generate SetRandomLocations vectorGenerator
+    , Random.generate CreateBalls vectorGenerator
     ]
 
 
 vectorGenerator : Generator (List Vec2)
 vectorGenerator =
     Random.list 3 <|
-        Random.map (\( x, y ) -> vec2 x y) (Random.pair (Random.float -500 0) (Random.float -500 0))
+        Random.map (\( x, y ) -> vec2 x y) (Random.pair (Random.float -500 500) (Random.float 500 0))
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( defaultModel, initialSizeCmd |> Cmd.batch )
+    ( defaultModel, Cmd.batch initialSizeCmd )
 
 
 type Msg
     = Resize Int Int
     | Tick Float
-    | SetRandomLocations (List Vec2)
+    | CreateBalls (List Vec2)
 
 
 update : Msg -> Model -> Model
@@ -81,7 +81,7 @@ update msg model =
         Tick dt ->
             step dt model
 
-        SetRandomLocations vectors ->
+        CreateBalls vectors ->
             { model | balls = createBalls vectors }
 
 
@@ -100,8 +100,17 @@ ballStepHelper ball dt =
     let
         { location, velocity } =
             ball
+
+        gravitationalAcceleration =
+            vec2 0 -0.01
+
+        newVelocity =
+            add velocity gravitationalAcceleration
     in
-        { ball | location = add location velocity }
+        { ball
+            | location = add location newVelocity
+            , velocity = newVelocity
+        }
 
 
 view : Model -> Html Msg
