@@ -4,7 +4,7 @@ import Html exposing (Html, div)
 import Color exposing (rgb)
 import Collage exposing (collage, oval, filled, move)
 import Element exposing (container, middle, toHtml)
-import Math.Vector2 exposing (Vec2, vec2, getX, getY)
+import Math.Vector2 exposing (Vec2, vec2, getX, getY, add)
 import Random exposing (..)
 import AnimationFrame
 import Window
@@ -13,7 +13,7 @@ import Task
 
 type alias Ball =
     { velocity : Vec2
-    , position : Vec2
+    , location : Vec2
     }
 
 
@@ -26,7 +26,7 @@ type alias Model =
 defaultBall : Float -> Float -> Ball
 defaultBall x y =
     { velocity = vec2 0 0
-    , position = vec2 x y
+    , location = vec2 x y
     }
 
 
@@ -47,7 +47,7 @@ defaultModel =
 initialSizeCmd : List (Cmd Msg)
 initialSizeCmd =
     [ Task.perform (\{ width, height } -> Resize width height) Window.size
-    , Random.generate GetRandomVectors vectorGenerator
+    , Random.generate SetRandomLocations vectorGenerator
     ]
 
 
@@ -65,7 +65,7 @@ init =
 type Msg
     = Resize Int Int
     | Tick Float
-    | GetRandomVectors (List Vec2)
+    | SetRandomLocations (List Vec2)
 
 
 update : Msg -> Model -> Model
@@ -81,18 +81,13 @@ update msg model =
         Tick dt ->
             step dt model
 
-        GetRandomVectors vectors ->
+        SetRandomLocations vectors ->
             { model | balls = createBalls vectors }
 
 
 createBalls : List Vec2 -> List Ball
 createBalls vectors =
     List.map (\vector -> defaultBall (getX vector) (getY vector)) vectors
-
-
-
--- Debug.log (toString vectors)
---     [ defaultBall -500 -500 ]
 
 
 step : Float -> Model -> Model
@@ -103,19 +98,10 @@ step dt model =
 ballStepHelper : Ball -> Float -> Ball
 ballStepHelper ball dt =
     let
-        currentX =
-            getX ball.position
-
-        currentY =
-            getY ball.position
-
-        newX =
-            currentX + 1
-
-        newY =
-            currentY + 1
+        { location, velocity } =
+            ball
     in
-        { ball | position = vec2 newX newY }
+        { ball | location = add location velocity }
 
 
 view : Model -> Html Msg
@@ -134,7 +120,7 @@ view model =
                     (\ball ->
                         (oval 50 50
                             |> filled (rgb 60 100 60)
-                            |> move ( getX ball.position, getY ball.position )
+                            |> move ( getX ball.location, getY ball.location )
                         )
                     )
                     balls
