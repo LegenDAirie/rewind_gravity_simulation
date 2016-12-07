@@ -99,6 +99,7 @@ applyForces : Float -> Ball -> Ball
 applyForces dt ball =
     ball
         |> applyGravity dt
+        |> applyFloor
 
 
 applyGravity : Float -> Ball -> Ball
@@ -115,6 +116,33 @@ applyGravity dt ball =
     in
         { ball
             | location = add location newVelocity
+            , velocity = newVelocity
+        }
+
+
+applyFloor : Ball -> Ball
+applyFloor ball =
+    let
+        currentX =
+            getX ball.location
+
+        currentY =
+            getY ball.location
+
+        newY =
+            if currentY < -200 then
+                -200
+            else
+                currentY
+
+        newVelocity =
+            if currentY < -200 then
+                vec2 (getX ball.velocity) -(getY ball.velocity)
+            else
+                ball.velocity
+    in
+        { ball
+            | location = vec2 currentX newY
             , velocity = newVelocity
         }
 
