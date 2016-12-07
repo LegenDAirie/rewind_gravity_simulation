@@ -4,7 +4,7 @@ import Html exposing (Html, div)
 import Color exposing (rgb)
 import Collage exposing (collage, oval, filled, move)
 import Element exposing (container, middle, toHtml)
-import Math.Vector2 exposing (Vec2, vec2, getX, getY, add)
+import Math.Vector2 exposing (Vec2, vec2, getX, getY, add, toTuple)
 import Random exposing (Generator)
 import AnimationFrame
 import Window
@@ -23,10 +23,10 @@ type alias Model =
     }
 
 
-defaultBall : Float -> Float -> Ball
-defaultBall x y =
+defaultBall : Vec2 -> Ball
+defaultBall vec =
     { velocity = vec2 0 0
-    , location = vec2 x y
+    , location = vec
     }
 
 
@@ -49,6 +49,11 @@ initialSizeCmd =
     [ Task.perform (\{ width, height } -> Resize width height) Window.size
     , Random.generate CreateBalls vectorGenerator
     ]
+
+
+createBalls : List Vec2 -> List Ball
+createBalls vectors =
+    List.map (\vector -> defaultBall vector) vectors
 
 
 vectorGenerator : Generator (List Vec2)
@@ -79,24 +84,25 @@ update msg model =
                 { model | windowSize = newWindowSize }
 
         Tick dt ->
-            step dt model
+            { model | balls = step dt model.balls }
 
         CreateBalls vectors ->
             { model | balls = createBalls vectors }
 
 
-createBalls : List Vec2 -> List Ball
-createBalls vectors =
-    List.map (\vector -> defaultBall (getX vector) (getY vector)) vectors
+step : Float -> List Ball -> List Ball
+step dt balls =
+    List.map (\ball -> applyForces dt ball) balls
 
 
-step : Float -> Model -> Model
-step dt model =
-    { model | balls = List.map (\ball -> ballStepHelper ball dt) model.balls }
+applyForces : Float -> Ball -> Ball
+applyForces dt ball =
+    ball
+        |> applyGravity dt
 
 
-ballStepHelper : Ball -> Float -> Ball
-ballStepHelper ball dt =
+applyGravity : Float -> Ball -> Ball
+applyGravity dt ball =
     let
         { location, velocity } =
             ball
@@ -129,7 +135,7 @@ view model =
                     (\ball ->
                         (oval 50 50
                             |> filled (rgb 60 100 60)
-                            |> move ( getX ball.location, getY ball.location )
+                            |> move (toTuple ball.location)
                         )
                     )
                     balls
