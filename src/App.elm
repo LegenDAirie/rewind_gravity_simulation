@@ -58,8 +58,8 @@ createBalls vectors =
 
 vectorGenerator : Generator (List Vec2)
 vectorGenerator =
-    Random.list 3 <|
-        Random.map (\( x, y ) -> vec2 x y) (Random.pair (Random.float -500 500) (Random.float 500 0))
+    Random.list 5 <|
+        Random.map (\( x, y ) -> vec2 x y) (Random.pair (Random.float -500 300) (Random.float 300 0))
 
 
 init : ( Model, Cmd Msg )
@@ -99,7 +99,9 @@ applyForces : Float -> Ball -> Ball
 applyForces dt ball =
     ball
         |> applyGravity dt
+        |> applyWind dt
         |> applyFloor
+        |> applyRightWall
 
 
 applyGravity : Float -> Ball -> Ball
@@ -109,10 +111,28 @@ applyGravity dt ball =
             ball
 
         gravitationalAcceleration =
-            vec2 0 -0.01
+            vec2 0 -0.1
 
         newVelocity =
             add velocity gravitationalAcceleration
+    in
+        { ball
+            | location = add location newVelocity
+            , velocity = newVelocity
+        }
+
+
+applyWind : Float -> Ball -> Ball
+applyWind dt ball =
+    let
+        { location, velocity } =
+            ball
+
+        windForce =
+            vec2 0.01 0
+
+        newVelocity =
+            add velocity windForce
     in
         { ball
             | location = add location newVelocity
@@ -143,6 +163,33 @@ applyFloor ball =
     in
         { ball
             | location = vec2 currentX newY
+            , velocity = newVelocity
+        }
+
+
+applyRightWall : Ball -> Ball
+applyRightWall ball =
+    let
+        currentX =
+            getX ball.location
+
+        currentY =
+            getY ball.location
+
+        newX =
+            if currentX > 400 then
+                400
+            else
+                currentX
+
+        newVelocity =
+            if currentX > 400 then
+                vec2 -(getX ball.velocity) (getY ball.velocity)
+            else
+                ball.velocity
+    in
+        { ball
+            | location = vec2 newX currentY
             , velocity = newVelocity
         }
 
